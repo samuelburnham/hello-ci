@@ -5,17 +5,16 @@ version: 2.1
 env:
   MSRV: 1.59.0
 
+executors:
+  
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   set-msrv:
-    runs-on: ubuntu-latest
     outputs:
       msrv: ${{ steps.msrv.outputs.msrv }}
     steps:
-      - uses: actions/checkout@v2
-      - id : msrv
-        run: echo "::set-output name=msrv::$(echo $MSRV)"
+      - run: echo "::set-output name=msrv::$(echo $MSRV)"
 
   build:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
