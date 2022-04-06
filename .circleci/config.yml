@@ -2,12 +2,27 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
+parameters:
+  stable-version:
+    type: string
+    default: "stable-2022-02-23"
 #orbs:
 #  rust: cimg/rust:1.59.0
 
-#executors:
-#  ubuntu: machine
+executors:
+  defualt:
+    machine:
+      image: ubuntu-2004:latest
+    resource_class: xlarge
 
+commands:
+  set-env-path:
+    steps:
+      - run:
+          name: Set PATH env variable
+      - command: |
+          echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
+          source $BASH_ENV
 #env:
 #  MSRV: 1.59.0
 
@@ -19,18 +34,39 @@ jobs:
  #     - run:
  #       name: msrv
  #       command: echo "::set-output name=msrv::$(echo $MSRV)"
+  cargo_fetch:
+    executor: default
+    environment: *setup-env
+    steps:
+      - checkout
+      - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
+      - run: rustup install $(cat rust-toolchain)
+      - run: rustup default $(cat rust-toolchain)
+      - run: cargo update
+      - run: cargo fetch
+      - run: rustc +$(cat rust-toolchain) --version
+      - run: rustup toolchain list --verbose
+      - persist_to_workspace:
+          root: "."
+          paths:
+            - Cargo.lock
 
   linux-build:
-    machine:
-      image: ubuntu-2004:current
-      resource_class: xlarge
+    executor: defualt
+    environment: *setup-env
+    parameters:
+      crate:
+        type: string
     steps:
       - checkout
       - run:
           cargo --version
+      - attach_workspace:
+          at: "."
       - run:
           name: Run Tests
-          command: "cargo test"
+          command: cargo +$(cat rust-toolchain) test --verbose --package << parameters.crate >>
+	  no_output_timeout: 30m
 
   build:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
