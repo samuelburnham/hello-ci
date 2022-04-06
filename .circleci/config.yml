@@ -16,7 +16,6 @@ executors:
     resource_class: xlarge
 
 commands:
-  set-env-path:
     steps:
       - run:
           name: Set PATH env variable
@@ -34,7 +33,7 @@ jobs:
  #     - run:
  #       name: msrv
  #       command: echo "::set-output name=msrv::$(echo $MSRV)"
-  cargo_fetch:
+  cargo-fetch:
     executor: default
     steps:
       - checkout
@@ -52,7 +51,6 @@ jobs:
 
   linux-build:
     executor: defualt
-    environment: *setup-env
     parameters:
       crate:
         type: string
@@ -87,6 +85,7 @@ jobs:
 workflows:
   build-workflow:
     jobs:
+      - cargo-fetch
       - linux-build
 
 
