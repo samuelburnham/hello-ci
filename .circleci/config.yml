@@ -50,7 +50,7 @@ jobs:
             - Cargo.lock
 
   linux-build:
-    executor: defualt
+    executor: default
     steps:
       - checkout
       - run:
