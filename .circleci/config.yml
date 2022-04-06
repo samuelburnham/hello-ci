@@ -10,9 +10,9 @@ parameters:
 #  rust: cimg/rust:1.59.0
 
 executors:
-  defualt:
+  default:
     machine:
-      image: ubuntu-2004:latest
+      image: ubuntu-2004:202010-01
     resource_class: xlarge
 
 commands:
@@ -36,7 +36,6 @@ jobs:
  #       command: echo "::set-output name=msrv::$(echo $MSRV)"
   cargo_fetch:
     executor: default
-    environment: *setup-env
     steps:
       - checkout
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -66,7 +65,7 @@ jobs:
       - run:
           name: Run Tests
           command: cargo +$(cat rust-toolchain) test --verbose --package << parameters.crate >>
-	  no_output_timeout: 30m
+          no_output_timeout: 30m
 
   build:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
