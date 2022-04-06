@@ -15,7 +15,25 @@ executors:
       image: ubuntu-2004:202010-01
     resource_class: xlarge
 
-#commands:
+commands:
+  save_rustup_cache:
+    steps:
+      # Move things from the home directory to `/tmp` first, so that it can be
+      # restored on executors that have a different home directory.
+      - run: cp -R ~/.cargo ~/.rustup /tmp/
+      - save_cache:
+          name: "Save rustup cache"
+          key: cargo-v28-e-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
+          paths:
+            - /tmp/.cargo
+            - /tmp/.rustup
+  restore_rustup_cache:
+    steps:
+      - restore_cache:
+          name: "Restore rustup cache"
+          key: cargo-v28-e-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
+      # Cache might not be created yet, hence ignore if the move fails
+      - run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
 #    steps:
 #      - run:
 #          name: Set PATH env variable
@@ -37,6 +55,11 @@ jobs:
     executor: default
     steps:
       - checkout
+      - run:
+          name: Calculate dependencies
+          command: cargo generate-lockfile
+          no_output_timeout: 30m
+      - restore_rustup_cache
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
       - run: rustup install $(cat rust-toolchain)
       - run: rustup default $(cat rust-toolchain)
@@ -48,15 +71,16 @@ jobs:
           root: "."
           paths:
             - Cargo.lock
+      - save_rustup_cache
 
   linux-build:
     executor: default
     steps:
       - checkout
-      - run:
-          cargo --version
       - attach_workspace:
           at: "."
+      - run:
+          cargo --version
       - run:
           name: Run Tests
           command: cargo +$(cat rust-toolchain) test --verbose
