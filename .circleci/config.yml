@@ -3,9 +3,9 @@
 version: 2.1
 
 parameters:
-  stable-version:
+  nightly-version:
     type: string
-    default: "stable-2022-02-23"
+    default: "nightly-2022-04-05"
 #orbs:
 #  rust: cimg/rust:1.59.0
 
@@ -15,7 +15,25 @@ executors:
       image: ubuntu-2004:202010-01
     resource_class: xlarge
 
-#commands:
+restore-workspace: &restore-workspace
+  attach_workspace:
+    at: ~/
+
+restore-cache: &restore-cache
+  restore_cache:
+    keys:
+      - cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
+      - repo-source-{{ .Branch }}-{{ .Revision }}
+
+commands:
+  set-env-path:
+    steps:
+      - run:
+          name: Set the PATH env variable
+          command: |
+            # Also put the Rust LLVM tools into the PATH.
+                        echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.nightly-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
+            source $BASH_ENV
 #    steps:
 #      - run:
 #          name: Set PATH env variable
@@ -38,28 +56,47 @@ jobs:
     steps:
       - checkout
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
-      - run: rustup install $(cat rust-toolchain)
-      - run: rustup default $(cat rust-toolchain)
+      - set-env-path
+      - run: echo $HOME
+      - run: cargo --version
+      - run: rustc --version
+      - run:
+          name: Update submodules
+          command: git submodule update --init --recursive
+      - run:
+          name: Calculate dependencies
+          command: cargo generate-lockfile
+      - restore_cache:
+          keys:
+            - cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
       - run: cargo update
       - run: cargo fetch
-      - run: rustc +$(cat rust-toolchain) --version
-      - run: rustup toolchain list --verbose
+      - run: rustup install $(cat rust-toolchain)
+      - run: rustup default $(cat rust-toolchain)
+      # A nightly build is needed for code coverage reporting
+      - run: rustup toolchain install --profile minimal << pipeline.parameters.nightly-version >>
+      - run: rustup component add --toolchain << pipeline.parameters.nightly-version >> llvm-tools-preview
+      - run: rustc --version
+      - run: rm -rf .git
       - persist_to_workspace:
-          root: "."
+          root: ~/
+      - save_cache:
+          key: cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
           paths:
-            - Cargo.lock
+            - "~/.cargo"
+            - "~/.rustup"
 
   linux-build:
-    executor: defualt
+    executor: default
     steps:
-      - checkout
+      - set-env-path
+      - *restore-workspace
+      - *restore-cache
       - run:
           cargo --version
-      - attach_workspace:
-          at: "."
       - run:
           name: Run Tests
-          command: cargo +$(cat rust-toolchain) test --verbose
+          command: cargo test --verbose
           no_output_timeout: 30m
 
   build:
@@ -76,16 +113,17 @@ jobs:
       - run:
           name: Run Tests
           command: "cargo test"
-
+ 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   test-all:
     jobs:
       - cargo-fetch
-      - linux-build:
-          requires:
-            - cargo-fetch
+      #- linux-build:
+      #    requires:
+      #     - cargo-fetch
+      - build
 
 
 
