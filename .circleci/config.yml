@@ -2,19 +2,35 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-env:
-  MSRV: 1.59.0
+#orbs:
+#  rust: cimg/rust:1.59.0
 
-executors:
-  
+#executors:
+#  ubuntu: machine
+
+#env:
+#  MSRV: 1.59.0
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  set-msrv:
-    outputs:
-      msrv: ${{ steps.msrv.outputs.msrv }}
+ # set-msrv:
+ #   steps:
+ #     - run:
+ #       name: msrv
+ #       command: echo "::set-output name=msrv::$(echo $MSRV)"
+
+  linux-build:
+    machine:
+      image: ubuntu-2004:current
+      resource_class: xlarge
     steps:
-      - run: echo "::set-output name=msrv::$(echo $MSRV)"
+      - checkout
+      - run:
+          cargo --version
+      - run:
+          name: Run Tests
+          command: "cargo test"
 
   build:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
@@ -36,7 +52,7 @@ jobs:
 workflows:
   build-workflow:
     jobs:
-      - build
+      - linux-build
 
 
 
