@@ -127,10 +127,11 @@ jobs:
 workflows:
   test-all:
     jobs:
-      - cargo-fetch
-      - linux-build:
-          requires:
-           - cargo-fetch
+      #- cargo-fetch
+      #- linux-build:
+      #    requires:
+      #     - cargo-fetch
+      - build
 
 
 
