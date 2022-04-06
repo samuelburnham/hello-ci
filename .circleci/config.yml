@@ -83,10 +83,12 @@ jobs:
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  build-workflow:
+  test-all:
     jobs:
       - cargo-fetch
-      - linux-build
+      - linux-build:
+          requires:
+	    - cargo-fetch
 
 
 
