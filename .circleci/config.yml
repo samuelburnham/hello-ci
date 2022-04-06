@@ -51,9 +51,6 @@ jobs:
 
   linux-build:
     executor: defualt
-    parameters:
-      crate:
-        type: string
     steps:
       - checkout
       - run:
@@ -62,7 +59,7 @@ jobs:
           at: "."
       - run:
           name: Run Tests
-          command: cargo +$(cat rust-toolchain) test --verbose --package << parameters.crate >>
+          command: cargo +$(cat rust-toolchain) test --verbose
           no_output_timeout: 30m
 
   build:
@@ -88,7 +85,7 @@ workflows:
       - cargo-fetch
       - linux-build:
           requires:
-	    - cargo-fetch
+            - cargo-fetch
 
 
 
