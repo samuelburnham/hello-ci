@@ -55,10 +55,6 @@ jobs:
     executor: default
     steps:
       - checkout
-      - run:
-          name: Calculate dependencies
-          command: cargo generate-lockfile
-          no_output_timeout: 30m
       - restore_rustup_cache
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
       - run: rustup install $(cat rust-toolchain)
@@ -67,6 +63,10 @@ jobs:
       - run: cargo fetch
       - run: rustc +$(cat rust-toolchain) --version
       - run: rustup toolchain list --verbose
+      - run:
+          name: Calculate dependencies
+          command: cargo generate-lockfile
+          no_output_timeout: 30m
       - persist_to_workspace:
           root: "."
           paths:
