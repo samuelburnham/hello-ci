@@ -15,13 +15,13 @@ executors:
       image: ubuntu-2004:202010-01
     resource_class: xlarge
 
-commands:
-    steps:
-      - run:
-          name: Set PATH env variable
-      - command: |
-          echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
-          source $BASH_ENV
+#commands:
+#    steps:
+#      - run:
+#          name: Set PATH env variable
+#      - command: |
+#          echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
+#          source $BASH_ENV
 #env:
 #  MSRV: 1.59.0
 
