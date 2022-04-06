@@ -79,6 +79,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: "."
+      - restore_rustup_cache    
       - run:
           cargo --version
       - run:
