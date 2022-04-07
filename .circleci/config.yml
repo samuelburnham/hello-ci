@@ -90,16 +90,17 @@ jobs:
  #         no_output_timeout: 30m
 
   naive-mac-build:
-    executor: darwin
+    executor: default
     steps:
       - checkout
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
       - run: cargo --version
       - run: rustc --version
       - run: rustup install $(cat rust-toolchain)
+      - run: rustup target add aarch64-unknown-linux-gnu
       - run:
           name: MacOS Tests
-          command: cargo test --verbose
+          command: cargo test --verbose --target aarch64-unknown-linux-gnu
           no_output_timeout: 30m
  
 workflows:
