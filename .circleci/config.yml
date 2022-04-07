@@ -14,6 +14,10 @@ executors:
     machine:
       image: ubuntu-2004:202010-01
     resource_class: xlarge
+  darwin:
+    macos:
+      xcode: "13.3.0"
+    resource_class: xlarge
 
 restore-workspace: &restore-workspace
   attach_workspace:
@@ -96,42 +100,34 @@ jobs:
       - run:
           cargo --version
       - run:
-          name: Run Tests
+          name: Linux Tests
           command: cargo test --verbose
           no_output_timeout: 30m
 
-  build:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/rust:1.59.0
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+  mac-build:
+    executor: darwin
     steps:
-      - checkout
+      - set-env-path
+      - *restore-workspace
+      - *restore-cache
       - run:
           cargo --version
       - run:
-          rustup target add x86_64-unknown-linux-gnu
-      - run:
-          name: Run Tests
-          command: "cargo test --target x86_64-unknown-linux-gnu"
-      - run:
-          rustup target add aarch64-apple-darwin
-      - run:
-          name: Run Tests
-          command: "cargo test --target aarch64-apple-darwin"
+          name: MacOS Tests
+          command: cargo test --verbose
+          no_output_timeout: 30m
  
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   test-all:
     jobs:
-      #- cargo-fetch
+      - cargo-fetch
       #- linux-build:
       #    requires:
       #     - cargo-fetch
-      - build
+      - mac-build:
+          requires:
+           - cargo-fetch
+      # build
 
 
 
