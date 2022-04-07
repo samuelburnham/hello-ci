@@ -38,23 +38,8 @@ commands:
             # Also put the Rust LLVM tools into the PATH.
                         echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.nightly-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
             source $BASH_ENV
-#    steps:
-#      - run:
-#          name: Set PATH env variable
-#      - command: |
-#          echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
-#          source $BASH_ENV
-#env:
-#  MSRV: 1.59.0
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
- # set-msrv:
- #   steps:
- #     - run:
- #       name: msrv
- #       command: echo "::set-output name=msrv::$(echo $MSRV)"
   cargo-fetch:
     executor: default
     steps:
@@ -91,27 +76,27 @@ jobs:
             - "~/.cargo"
             - "~/.rustup"
 
-  linux-build:
-    executor: default
-    steps:
-      - set-env-path
-      - *restore-workspace
-      - *restore-cache
-      - run:
-          cargo --version
-      - run:
-          name: Linux Tests
-          command: cargo test --verbose
-          no_output_timeout: 30m
+ # linux-build:
+ #   executor: default
+ #   steps:
+ #     - set-env-path
+ #     - *restore-workspace
+ #     - *restore-cache
+ #     - run:
+ #         cargo --version
+ #     - run:
+ #         name: Linux Tests
+ #         command: cargo test --verbose
+ #         no_output_timeout: 30m
 
-  mac-build:
+  naive-mac-build:
     executor: darwin
     steps:
-      - set-env-path
-      - *restore-workspace
-      - *restore-cache
-      - run:
-          cargo --version
+      - checkout
+      - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
+      - run: cargo --version
+      - run: rustc --version
+      - run: rustup install $(cat rust-toolchain)
       - run:
           name: MacOS Tests
           command: cargo test --verbose
@@ -120,13 +105,11 @@ jobs:
 workflows:
   test-all:
     jobs:
-      - cargo-fetch
+      #- cargo-fetch
       #- linux-build:
       #    requires:
       #     - cargo-fetch
-      - mac-build:
-          requires:
-           - cargo-fetch
+      - naive-mac-build
       # build
 
 
