@@ -64,18 +64,18 @@ jobs:
             - "~/.cargo"
             - "~/.rustup"
 
- linux-build:
-   executor: default
-   steps:
-     - set-env-path
-     - *restore-workspace
-     - *restore-cache
-     - run:
-         cargo --version
-     - run:
-         name: Linux Tests
-         command: cargo test --verbose
-         no_output_timeout: 30m
+  linux-build:
+    executor: default
+    steps:
+    - set-env-path
+    - *restore-workspace
+    - *restore-cache
+    - run:
+        cargo --version
+    - run:
+        name: Linux Tests
+        command: cargo test --verbose
+        no_output_timeout: 30m
 
   naive-mac-build:
     executor: default
