@@ -1,13 +1,4 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-
-parameters:
-  nightly-version:
-    type: string
-    default: "nightly-2022-04-05"
-#orbs:
-#  rust: cimg/rust:1.59.0
 
 executors:
   default:
@@ -36,25 +27,10 @@ commands:
           name: Set the PATH env variable
           command: |
             # Also put the Rust LLVM tools into the PATH.
-                        echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.nightly-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
+            echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/$(cat rust-toolchain)-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
             source $BASH_ENV
-#    steps:
-#      - run:
-#          name: Set PATH env variable
-#      - command: |
-#          echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
-#          source $BASH_ENV
-#env:
-#  MSRV: 1.59.0
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
- # set-msrv:
- #   steps:
- #     - run:
- #       name: msrv
- #       command: echo "::set-output name=msrv::$(echo $MSRV)"
   cargo-fetch:
     executor: default
     steps:
@@ -77,9 +53,6 @@ jobs:
       - run: cargo fetch
       - run: rustup install $(cat rust-toolchain)
       - run: rustup default $(cat rust-toolchain)
-      # A nightly build is needed for code coverage reporting
-      - run: rustup toolchain install --profile minimal << pipeline.parameters.nightly-version >>
-      - run: rustup component add --toolchain << pipeline.parameters.nightly-version >> llvm-tools-preview
       - run: rustc --version
       - run: rm -rf .git
       - persist_to_workspace:
@@ -91,42 +64,54 @@ jobs:
             - "~/.cargo"
             - "~/.rustup"
 
-  linux-build:
+ linux-build:
+   executor: default
+   steps:
+     - set-env-path
+     - *restore-workspace
+     - *restore-cache
+     - run:
+         cargo --version
+     - run:
+         name: Linux Tests
+         command: cargo test --verbose
+         no_output_timeout: 30m
+
+  naive-mac-build:
     executor: default
     steps:
-      - set-env-path
-      - *restore-workspace
-      - *restore-cache
-      - run:
-          cargo --version
-      - run:
-          name: Linux Tests
-          command: cargo test --verbose
-          no_output_timeout: 30m
-
-  mac-build:
-    executor: darwin
-    steps:
-      - set-env-path
-      - *restore-workspace
-      - *restore-cache
-      - run:
-          cargo --version
+      - checkout
+      - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
+      - run: cargo --version
+      - run: rustc --version
+      - run: rustup install $(cat rust-toolchain)
+      - run: rustup target add aarch64-unknown-linux-gnu
       - run:
           name: MacOS Tests
-          command: cargo test --verbose
+          command: cargo test --verbose --target aarch64-unknown-linux-gnu
           no_output_timeout: 30m
+
+  rustfmt:
+    executor: default
+    steps:
+      - *restore-workspace
+      - *restore-cache
+      - set-env-path
+      - run:
+          name: Run cargo fmt
+          command: cargo fmt --all -- --check
  
 workflows:
   test-all:
     jobs:
       - cargo-fetch
-      #- linux-build:
-      #    requires:
-      #     - cargo-fetch
-      - mac-build:
+      - linux-build:
           requires:
            - cargo-fetch
+      - rustfmt:
+          requires:
+            - cargo-fetch
+      # naive-mac-build
       # build
 
 
