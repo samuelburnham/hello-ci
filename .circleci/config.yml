@@ -67,7 +67,7 @@ jobs:
   linux-build:
     executor: default
     steps:
-    - set-env-path
+    #- set-env-path
     - *restore-workspace
     - *restore-cache
     - run:
@@ -96,7 +96,7 @@ jobs:
     steps:
       - *restore-workspace
       - *restore-cache
-      - set-env-path
+      #- set-env-path
       - run:
           name: Run cargo fmt
           command: cargo fmt --all -- --check
