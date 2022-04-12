@@ -19,23 +19,25 @@ executors:
     resource_class: xlarge
 
 commands:
-  save-rustup-cache:
+  save_rustup_cache:
     steps:
       - run: cp -R ~/.cargo ~/.rustup /tmp/
       - save_cache:
           name: "Save rustup cache"
           key: cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{arch}}
           paths:
-            - /tmp/.cargo
-            - /tmp/.rustup
-  restore-rustup-cache:
+            # - /tmp/.cargo
+            # - /tmp/.rustup
+            - "~/.cargo"
+            - "~/.rustup"
+  restore_rustup_cache:
       steps:
         - restore_cache:
             keys:
               - cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
               - repo-source-{{ .Branch }}-{{ .Revision }}
         - run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
-  cargo-fetch:
+  cargo_fetch:
     steps:
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
       - run: echo $HOME
@@ -57,42 +59,42 @@ commands:
       - run: rustc --version
       - run: rm -rf .git
       - persist_to_workspace:
-          root: .
+          root: ~/
           paths:
             - Cargo.lock
-      - save-rustup-cache
+      - save_rustup_cache
 
 jobs:
-  fetch-linux:
+  fetch_linux:
     executor: default
     steps:
       - checkout
-      - cargo-fetch
-  fetch-mac:
+      - cargo_fetch
+  fetch_mac:
     executor: darwin
     steps:
       - checkout
-      - cargo-fetch
-  linux-build:
+      - cargo_fetch
+  linux_build:
     executor: default
     steps:
     - checkout
     - attach_workspace:
-        at: "."
-    - restore-rustup-cache
+        at: "~/"
+    - restore_rustup_cache
     - run:
         cargo --version
     - run:
         name: Linux Tests
         command: cargo test --verbose
         no_output_timeout: 30m
-  mac-build:
+  mac_build:
     executor: darwin
     steps:
     - checkout
     - attach_workspace:
-        at: "/tmp"
-    - restore-rustup-cache
+        at: "~/"
+    - restore_rustup_cache
     - run:
         cargo --version
     - run:
@@ -104,8 +106,8 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: "."
-      - restore-rustup-cache
+          at: "~/"
+      - restore_rustup_cache
       - run:
           name: Run cargo fmt
           command: cargo fmt --all -- --check
@@ -114,29 +116,29 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: "."
-      - restore-rustup-cache
+          at: "~/"
+      - restore_rustup_cache
       - run:
           name: Run clippy
           command: cargo clippy --all -- -D warnings
  
 workflows:
-  test-all:
+  test_all:
     jobs:
-      - fetch-linux
-      - fetch-mac
-      - linux-build:
+      - fetch_linux
+      - fetch_mac
+      - linux_build:
           requires:
-            - fetch-linux
-      - mac-build:
+            - fetch_linux
+      - mac_build:
           requires:
-            - fetch-mac
+            - fetch_mac
       - rustfmt:
           requires:
-            - fetch-linux
+            - fetch_linux
       - clippy:
           requires:
-            - fetch-linux
+            - fetch_linux
 
 
 
