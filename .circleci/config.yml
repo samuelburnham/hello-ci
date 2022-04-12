@@ -12,12 +12,12 @@ executors:
   default:
     machine:
       image: ubuntu-2004:202010-01
-    working_directory: ~/helloci
+    #working_directory: ~/helloci
     resource_class: xlarge
   darwin:
     macos:
       xcode: "13.3.0"
-    working_directory: ~/helloci
+    #working_directory: ~/helloci
     resource_class: xlarge
 
 commands:
@@ -31,22 +31,22 @@ commands:
             source $BASH_ENV
   save_rustup_cache:
     steps:
-      # - run: cp -R ~/.cargo ~/.rustup /tmp/
+      - run: cp -R ~/.cargo ~/.rustup /tmp/
       - save_cache:
           name: "Save rustup cache"
           key: cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{arch}}
           paths:
-           - "~/.cargo"
-           - "~/.rustup"
-  #         - /tmp/.cargo
-  #         - /tmp/.rustup
+           #- "~/.cargo"
+           #- "~/.rustup"
+            - /tmp/.cargo
+            - /tmp/.rustup
   restore_rustup_cache:
     steps:
       - restore_cache:
           keys:
             - cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
             - repo-source-{{ .Branch }}-{{ .Revision }}
-        #- run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
+      - run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
   cargo_fetch:
     steps:
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -67,15 +67,25 @@ commands:
       - run: rustc --version
       - run: rm -rf .git
       - persist_to_workspace:
-          root: ~/
-          paths:
-            - helloci
-          # root: "."
+          # root: ~/
           # paths:
-          #   - Cargo.lock
+          #   - helloci
+          root: "."
+          paths:
+            - Cargo.lock
       - save_rustup_cache
 
 jobs:
+  persist_cache_to_workspace:
+    executor: default
+    steps:
+      - checkout
+      - restore_rustup_cache
+      - persist_to_workspace:
+          root: /tmp
+          paths: 
+            - .
+
   fetch_linux:
     executor: default
     steps:
@@ -87,7 +97,6 @@ jobs:
     steps:
       - checkout
       - cargo_fetch
-      - run: cp -R ~/.cargo ~/.rustup /tmp/
 
   linux_build:
     executor: default
@@ -108,11 +117,10 @@ jobs:
     executor: darwin
     steps:
     - checkout
-    - run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
+    #- run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
     - attach_workspace:
-        at: "~/"
-        #at: "/tmp"
-    - restore_rustup_cache
+        #at: "~/"
+        at: "/tmp"
     - run:
         cargo --version
     - run:
@@ -147,6 +155,7 @@ jobs:
 workflows:
   test_all:
     jobs:
+      - persist_cache_to_workspace
       - fetch_linux
       - fetch_mac
       - linux_build:
@@ -155,6 +164,7 @@ workflows:
       - mac_build:
           requires:
             - fetch_mac
+            - persist_cache_to_workspace
       - rustfmt:
           requires:
             - fetch_linux
