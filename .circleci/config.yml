@@ -12,10 +12,12 @@ executors:
   default:
     machine:
       image: ubuntu-2004:202010-01
+    working_directory: ~/helloci
     resource_class: xlarge
   darwin:
     macos:
       xcode: "13.3.0"
+    working_directory: ~/helloci
     resource_class: xlarge
 
 commands:
@@ -55,12 +57,10 @@ commands:
       - run: rustup default $(cat rust-toolchain)
       - run: rustc --version
       - run: rm -rf .git
-      # - persist_to_workspace:
-      #    root: ~
-      #     paths:
-      #       - ~/.cargo
-      #       - ~/.rustup
-      #       - ~/
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - helloci
       - save_rustup_cache
 
 jobs:
