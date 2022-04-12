@@ -69,9 +69,12 @@ commands:
       - run: rustc --version
       - run: rm -rf .git
       - persist_to_workspace:
-          root: ~/
+          #root: ~/
+          #paths:
+          #  - helloci
+          root: "."
           paths:
-            - helloci
+            - Cargo.lock
       - save_rustup_cache
 
 jobs:
@@ -80,7 +83,7 @@ jobs:
     steps:
       - checkout
       - cargo_fetch
-      - set-env-path
+      #- set-env-path
   fetch_mac:
     executor: darwin
     steps:
@@ -91,9 +94,10 @@ jobs:
     executor: default
     steps:
     - checkout
-    - set-env-path
+    #- set-env-path
     - attach_workspace:
-        at: "~/"
+        #at: "~/"
+        at: "."
     - restore_rustup_cache
     - run:
         cargo --version
@@ -106,7 +110,8 @@ jobs:
     steps:
     - checkout
     - attach_workspace:
-        at: "~/"
+        # at: "~/"
+        at: "/tmp"
     - restore_rustup_cache
     #- run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
     - run:
@@ -119,9 +124,10 @@ jobs:
     executor: default
     steps:
       - checkout
-      - set-env-path
+      #- set-env-path
       - attach_workspace:
-          at: "~/"
+          #at: "~/"
+          at: "."
       - restore_rustup_cache
       - run:
           name: Run cargo fmt
@@ -130,9 +136,10 @@ jobs:
     executor: default
     steps:
       - checkout
-      - set-env-path
+      #- set-env-path
       - attach_workspace:
-          at: "~/"
+          #at: "~/"
+          at: "."
       - restore_rustup_cache
       - run:
           name: Run clippy
