@@ -85,19 +85,18 @@ jobs:
         command: cargo test --verbose
         no_output_timeout: 30m
 
-  naive-mac-build:
-    executor: default
+  mac-build:
+    executor: darwin
     steps:
-      - checkout
-      - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
-      - run: cargo --version
-      - run: rustc --version
-      - run: rustup install $(cat rust-toolchain)
-      - run: rustup target add aarch64-unknown-linux-gnu
-      - run:
-          name: MacOS Tests
-          command: cargo test --verbose --target aarch64-unknown-linux-gnu
-          no_output_timeout: 30m
+    - set-env-path
+    - *restore-workspace
+    - *restore-cache
+    - run:
+        cargo --version
+    - run:
+        name: MacOS Tests
+        command: cargo test --verbose
+        no_output_timeout: 30m
 
   rustfmt:
     executor: default
@@ -113,14 +112,15 @@ workflows:
   test-all:
     jobs:
       - cargo-fetch
-      - linux-build:
-          requires:
-           - cargo-fetch
-      - rustfmt:
+      # - linux-build:
+      #     requires:
+      #      - cargo-fetch
+      # - rustfmt:
+      #     requires:
+      #       - cargo-fetch
+      - mac-build:
           requires:
             - cargo-fetch
-      # naive-mac-build
-      # build
 
 
 
