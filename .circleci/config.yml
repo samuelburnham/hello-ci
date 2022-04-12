@@ -81,7 +81,7 @@ jobs:
     steps:
       - checkout
       - cargo_fetch
-      #- set-env-path
+      - set-env-path
   fetch_mac:
     executor: darwin
     steps:
@@ -92,7 +92,7 @@ jobs:
     executor: default
     steps:
     - checkout
-    #- set-env-path
+    - set-env-path
     - attach_workspace:
         #at: "~/"
         at: "."
@@ -122,7 +122,7 @@ jobs:
     executor: default
     steps:
       - checkout
-      #- set-env-path
+      - set-env-path
       - attach_workspace:
           #at: "~/"
           at: "."
@@ -134,7 +134,7 @@ jobs:
     executor: default
     steps:
       - checkout
-      #- set-env-path
+      - set-env-path
       - attach_workspace:
           #at: "~/"
           at: "."
