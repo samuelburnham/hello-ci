@@ -63,7 +63,7 @@ jobs:
       - run: rustup install $(cat rust-toolchain)
       - run: rustup default $(cat rust-toolchain)
       - run: rustc --version
-      - run: rm -rf .git
+      # - run: rm -rf .git
       - persist_to_workspace:
           root: ~/
           paths:
