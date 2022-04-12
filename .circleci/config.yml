@@ -46,8 +46,8 @@ commands:
           paths:
            #- "~/.cargo"
            #- "~/.rustup"
-            - "~/tmp/.cargo"
-            - "~/tmp/.rustup"
+            - "tmp/.cargo"
+            - "tmp/.rustup"
 
   restore_rustup_cache:
     steps:
