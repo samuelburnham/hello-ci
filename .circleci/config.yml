@@ -98,7 +98,7 @@ jobs:
     executor: darwin
     steps:
     - checkout
-    - set-xcode-path
+    #- set-xcode-path
     - attach_workspace:
         at: "~/"
     - run:
@@ -131,6 +131,9 @@ jobs:
     steps:
       - checkout
       - set-env-path
+      - attach_workspace:
+          at: "~"
+      - restore_rustup_cache
       - run:
           name: Run clippy
           command: cargo clippy --all -- -D warnings
