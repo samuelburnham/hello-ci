@@ -105,9 +105,10 @@ jobs:
   rustfmt:
     executor: default
     steps:
-      - *restore-workspace
-      - *restore-cache
-      - set-env-path
+      - checkout
+      - attach_workspace:
+          at: "."
+      - restore-rustup-cache
       - run:
           name: Run cargo fmt
           command: cargo fmt --all -- --check
@@ -116,11 +117,9 @@ workflows:
   test-all:
     jobs:
       - cargo-fetch
-      - persist-parameters-to-workspace
-
-      # - linux-build:
-      #     requires:
-      #      - cargo-fetch
+      - linux-build:
+          requires:
+           - cargo-fetch
       # - rustfmt:
       #     requires:
       #       - cargo-fetch
