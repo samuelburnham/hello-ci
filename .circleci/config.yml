@@ -90,7 +90,8 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - .
+            - Cargo.lock
+            
       - save_rustup_cache
 
   linux_build:
