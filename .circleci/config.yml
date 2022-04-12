@@ -31,22 +31,19 @@ commands:
             source $BASH_ENV
   save_rustup_cache:
     steps:
-      - run: cp -R ~/.cargo ~/.rustup /tmp/
       - save_cache:
           name: "Save rustup cache"
           key: cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{arch}}
           paths:
-           #- "~/.cargo"
-           #- "~/.rustup"
-            - /tmp/.cargo
-            - /tmp/.rustup
+           - "~/.cargo"
+           - "~/.rustup"
   restore_rustup_cache:
     steps:
       - restore_cache:
-          keys:
             - cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
             - repo-source-{{ .Branch }}-{{ .Revision }}
-      - run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
+
+jobs:
   cargo_fetch:
     steps:
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -72,28 +69,11 @@ commands:
             - helloci
       - save_rustup_cache
 
-jobs:
-  persist_cache_to_workspace:
-    executor: default
-    steps:
-      - checkout
-      - restore_rustup_cache
-      - persist_to_workspace:
-          root: /tmp
-          paths: 
-            - .
-
   fetch_linux:
     executor: default
     steps:
       - checkout
-      - cargo_fetch
       - set-env-path
-  fetch_mac:
-    executor: darwin
-    steps:
-      - checkout
-      - cargo_fetch
 
   linux_build:
     executor: default
@@ -102,7 +82,6 @@ jobs:
     - set-env-path
     - attach_workspace:
         at: "~/"
-        #at: "."
     - restore_rustup_cache
     - run:
         cargo --version
@@ -110,14 +89,14 @@ jobs:
         name: Linux Tests
         command: cargo test --verbose
         no_output_timeout: 30m
+
   mac_build:
     executor: darwin
     steps:
     - checkout
-    #- run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
+    - set-env-path
     - attach_workspace:
-        #at: "~/"
-        at: "/tmp"
+        at: "~/"
     - run:
         cargo --version
     - run:
@@ -130,8 +109,7 @@ jobs:
       - checkout
       - set-env-path
       - attach_workspace:
-          at: "~/"
-          #at: "."
+          at: "."
       - restore_rustup_cache
       - run:
           name: Run cargo fmt
@@ -142,8 +120,7 @@ jobs:
       - checkout
       - set-env-path
       - attach_workspace:
-          at: "~/"
-          #at: "."
+          at: "."
       - restore_rustup_cache
       - run:
           name: Run clippy
@@ -153,22 +130,17 @@ workflows:
   test_all:
     jobs:
       - persist_cache_to_workspace
-      - fetch_linux
-      - fetch_mac
+      - cargo_fetch
       - linux_build:
           requires:
-            - fetch_linux
+            - cargo_fetch
       - mac_build:
           requires:
-            - fetch_mac
             - persist_cache_to_workspace
       - rustfmt:
           requires:
-            - fetch_linux
+            - cargo_fetch
       - clippy:
           requires:
-            - fetch_linux
+            - cargo_fetch
 
-
-
-      
