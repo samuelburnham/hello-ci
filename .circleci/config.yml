@@ -43,10 +43,7 @@ commands:
               - cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
               - repo-source-{{ .Branch }}-{{ .Revision }}
         - run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
-
-jobs:
   cargo-fetch:
-    executor: default
     steps:
       - checkout
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -74,9 +71,12 @@ jobs:
             - Cargo.lock
       - save-rustup-cache
 
+jobs:
+
   linux-build:
     executor: default
     steps:
+    - cargo-fetch
     - checkout
     - attach_workspace:
         at: "."
@@ -91,6 +91,7 @@ jobs:
   mac-build:
     executor: darwin
     steps:
+    - cargo-fetch
     - checkout
     - attach_workspace:
         at: "/tmp"
@@ -116,16 +117,11 @@ jobs:
 workflows:
   test-all:
     jobs:
-      - cargo-fetch
-      - linux-build:
-          requires:
-           - cargo-fetch
+      - linux-build
       # - rustfmt:
       #     requires:
       #       - cargo-fetch
-      - mac-build:
-          requires:
-            - cargo-fetch
+      - mac-build
 
 
 
