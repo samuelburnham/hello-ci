@@ -18,42 +18,38 @@ executors:
       xcode: "13.3.0"
     resource_class: xlarge
 
-restore-workspace: &restore-workspace
-  attach_workspace:
-    at: ~/
-
-restore-cache: &restore-cache
-  restore_cache:
-    keys:
-      - cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
-      - repo-source-{{ .Branch }}-{{ .Revision }}
-
 commands:
-  set-env-path:
+  # set-env-path:
+  #   steps:
+  #     - run:
+  #         name: Set the PATH env variable
+  #         command: |
+  #           # Also put the Rust LLVM tools into the PATH.
+  #           echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
+  #           source $BASH_ENV
+  save-rustup-cache:
     steps:
-      - run:
-          name: Set the PATH env variable
-          command: |
-            # Also put the Rust LLVM tools into the PATH.
-            echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
-            source $BASH_ENV
+      - run: cp -R ~/.cargo ~/.rustup /tmp/
+      - save_cache:
+          name: "Save rustup cache"
+          key: cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{arch}}
+          paths:
+            - /tmp/.cargo
+            - /tmp/.rustup
+  restore-rustup-cache:
+      steps:
+        - restore_cache:
+            keys:
+              - cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
+              - repo-source-{{ .Branch }}-{{ .Revision }}
+        - run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
 
 jobs:
-  persist-parameters-to-workspace:
-    executor: default
-    steps:
-      - checkout
-      - restore-parameter-cache
-      - persist-to-workspace:
-          root: /tmp
-          paths: .
-          
   cargo-fetch:
     executor: default
     steps:
       - checkout
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
-      - set-env-path
       - run: echo $HOME
       - run: cargo --version
       - run: rustc --version
@@ -73,20 +69,18 @@ jobs:
       - run: rustc --version
       - run: rm -rf .git
       - persist_to_workspace:
-          root: ~/
-          paths: .
-      - save_cache:
-          key: cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
+          root: .
           paths:
-            - "~/.cargo"
-            - "~/.rustup"
+            - Cargo.lock
+      - save-rustup-cache
 
   linux-build:
     executor: default
     steps:
-    - set-env-path
-    - *restore-workspace
-    - *restore-cache
+    - checkout
+    - attach_workspace:
+        at: "."
+    - restore-rustup-cache
     - run:
         cargo --version
     - run:
@@ -97,9 +91,10 @@ jobs:
   mac-build:
     executor: darwin
     steps:
-    #- set-env-path
-    - *restore-workspace
-    - *restore-cache
+    - checkout
+    - attach_workspace:
+        at: "/tmp"
+    - restore-rustup-cache
     - run:
         cargo --version
     - run:
@@ -121,6 +116,8 @@ workflows:
   test-all:
     jobs:
       - cargo-fetch
+      - persist-parameters-to-workspace
+
       # - linux-build:
       #     requires:
       #      - cargo-fetch
@@ -130,6 +127,7 @@ workflows:
       - mac-build:
           requires:
             - cargo-fetch
+            - persist-parameters-to-workspace
 
 
 
