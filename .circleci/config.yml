@@ -126,7 +126,6 @@ workflows:
       - mac-build:
           requires:
             - cargo-fetch
-            - persist-parameters-to-workspace
 
 
 
