@@ -88,10 +88,11 @@ jobs:
       - run: rustc --version
       # - run: rm -rf .git
       - persist_to_workspace:
-          root: /tmp
+          root: .
           paths:
             - Cargo.lock
-            
+            #- .cargo
+            #- .rustup
       - save_rustup_cache
 
   linux_build:
