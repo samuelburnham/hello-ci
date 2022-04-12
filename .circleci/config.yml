@@ -19,7 +19,7 @@ executors:
     resource_class: xlarge
 
 commands:
-  set-bash-path:
+  set-env-path:
     steps:
       - run:
           name: Set the PATH env variable
