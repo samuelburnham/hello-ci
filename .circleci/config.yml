@@ -78,12 +78,6 @@ jobs:
             - .
       - save_rustup_cache
 
-  fetch_linux:
-    executor: default
-    steps:
-      - checkout
-      - set-env-path
-
   linux_build:
     executor: default
     steps:
@@ -126,7 +120,7 @@ jobs:
       - checkout
       - set-env-path
       - attach_workspace:
-          at: "."
+          at: "~"
       - restore_rustup_cache
       - run:
           name: Run cargo fmt
@@ -137,7 +131,7 @@ jobs:
       - checkout
       - set-env-path
       - attach_workspace:
-          at: "."
+          at: "~"
       - restore_rustup_cache
       - run:
           name: Run clippy
