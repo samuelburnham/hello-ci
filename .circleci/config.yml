@@ -1,5 +1,13 @@
 version: 2.1
 
+parameters:
+  stable-version:
+    type: string
+    default: "stable-2022-02-04"
+  nightly-version:
+    type: string
+    default: "nightly-2022-02-04"
+
 executors:
   default:
     machine:
@@ -27,7 +35,7 @@ commands:
           name: Set the PATH env variable
           command: |
             # Also put the Rust LLVM tools into the PATH.
-            echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/$(cat rust-toolchain)-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
+            echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
             source $BASH_ENV
 
 jobs:
@@ -67,7 +75,7 @@ jobs:
   linux-build:
     executor: default
     steps:
-    #- set-env-path
+    - set-env-path
     - *restore-workspace
     - *restore-cache
     - run:
@@ -96,7 +104,7 @@ jobs:
     steps:
       - *restore-workspace
       - *restore-cache
-      #- set-env-path
+      - set-env-path
       - run:
           name: Run cargo fmt
           command: cargo fmt --all -- --check
