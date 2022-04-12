@@ -12,10 +12,12 @@ executors:
   default:
     machine:
       image: ubuntu-2004:202010-01
+    working_directory: ~/helloci
     resource_class: xlarge
   darwin:
     macos:
       xcode: "13.3.0"
+    working_directory: ~/helloci
     resource_class: xlarge
 
 commands:
@@ -74,7 +76,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - .
+            - helloci
       - save_rustup_cache
 
   linux_build:
