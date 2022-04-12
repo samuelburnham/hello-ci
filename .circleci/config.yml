@@ -98,9 +98,10 @@ jobs:
     executor: darwin
     steps:
     - checkout
-    - set-xcode-path
+    #- set-xcode-path
     - attach_workspace:
         at: "~/"
+    #-restore_rustup_cache
     - run:
         name: Install Rust
         command: |
@@ -111,6 +112,7 @@ jobs:
         cargo --version
     - run: cargo update
     - run: cargo fetch
+    - run: cargo --version
     - run:
         name: MacOS Tests
         command: cargo test --verbose
