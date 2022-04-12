@@ -11,7 +11,7 @@ parameters:
 executors:
   default:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202110-01
     working_directory: ~/helloci
     resource_class: xlarge
   darwin:
@@ -51,9 +51,9 @@ jobs:
       - run: echo $HOME
       - run: cargo --version
       - run: rustc --version
-      - run:
-          name: Update submodules
-          command: git submodule update --init --recursive
+      # - run:
+      #     name: Update submodules
+      #     command: git submodule update --init --recursive
       - run:
           name: Calculate dependencies
           command: cargo generate-lockfile
