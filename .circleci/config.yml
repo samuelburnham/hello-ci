@@ -19,14 +19,6 @@ executors:
     resource_class: xlarge
 
 commands:
-  # set-env-path:
-  #   steps:
-  #     - run:
-  #         name: Set the PATH env variable
-  #         command: |
-  #           # Also put the Rust LLVM tools into the PATH.
-  #           echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
-  #           source $BASH_ENV
   save-rustup-cache:
     steps:
       - run: cp -R ~/.cargo ~/.rustup /tmp/
@@ -45,7 +37,6 @@ commands:
         - run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
   cargo-fetch:
     steps:
-      - checkout
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
       - run: echo $HOME
       - run: cargo --version
@@ -72,11 +63,20 @@ commands:
       - save-rustup-cache
 
 jobs:
-
+  fetch-linux:
+    executor: default
+    steps:
+      - checkout
+      - cargo-fetch
+  fetch-mac:
+    executor: darwin
+    steps:
+      - checkout
+      - cargo-fetch
   linux-build:
     executor: default
     steps:
-    - cargo-fetch
+    - checkout
     - attach_workspace:
         at: "."
     - restore-rustup-cache
@@ -86,11 +86,10 @@ jobs:
         name: Linux Tests
         command: cargo test --verbose
         no_output_timeout: 30m
-
   mac-build:
     executor: darwin
     steps:
-    - cargo-fetch
+    - checkout
     - attach_workspace:
         at: "/tmp"
     - restore-rustup-cache
@@ -100,7 +99,6 @@ jobs:
         name: MacOS Tests
         command: cargo test --verbose
         no_output_timeout: 30m
-
   rustfmt:
     executor: default
     steps:
@@ -111,15 +109,34 @@ jobs:
       - run:
           name: Run cargo fmt
           command: cargo fmt --all -- --check
+  clippy:
+    executor: default
+    steps:
+      - checkout
+      - attach_workspace:
+          at: "."
+      - restore-rustup-cache
+      - run:
+          name: Run clippy
+          command: cargo clippy --all -- -D warnings
  
 workflows:
   test-all:
     jobs:
-      - linux-build
-      # - rustfmt:
-      #     requires:
-      #       - cargo-fetch
-      - mac-build
+      - fetch-linux
+      - fetch-mac
+      - linux-build:
+          requires:
+            - fetch-linux
+      - mac-build:
+          requires:
+            - fetch-mac
+      - rustfmt:
+          requires:
+            - fetch-linux
+      - clippy:
+          requires:
+            - fetch-linux
 
 
 
