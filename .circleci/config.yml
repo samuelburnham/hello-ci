@@ -77,7 +77,6 @@ jobs:
     executor: default
     steps:
     - cargo-fetch
-    - checkout
     - attach_workspace:
         at: "."
     - restore-rustup-cache
@@ -92,7 +91,6 @@ jobs:
     executor: darwin
     steps:
     - cargo-fetch
-    - checkout
     - attach_workspace:
         at: "/tmp"
     - restore-rustup-cache
