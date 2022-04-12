@@ -45,6 +45,7 @@ jobs:
   cargo_fetch:
     executor: default
     steps:
+      - checkout:
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
       - run: echo $HOME
       - run: cargo --version
