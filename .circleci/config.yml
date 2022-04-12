@@ -26,7 +26,6 @@ commands:
           command: |
             # Also put the Rust LLVM tools into the PATH.
             echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
-            PATH=${PATH}:/opt/local/bin
             source $BASH_ENV
 
   set-xcode-path:
