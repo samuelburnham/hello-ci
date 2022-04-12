@@ -21,13 +21,10 @@ executors:
 commands:
   save_rustup_cache:
     steps:
-      - run: cp -R ~/.cargo ~/.rustup /tmp/
       - save_cache:
           name: "Save rustup cache"
           key: cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{arch}}
           paths:
-            # - /tmp/.cargo
-            # - /tmp/.rustup
             - "~/.cargo"
             - "~/.rustup"
   restore_rustup_cache:
@@ -58,10 +55,12 @@ commands:
       - run: rustup default $(cat rust-toolchain)
       - run: rustc --version
       - run: rm -rf .git
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - .
+      # - persist_to_workspace:
+      #    root: ~
+      #     paths:
+      #       - ~/.cargo
+      #       - ~/.rustup
+      #       - ~/
       - save_rustup_cache
 
 jobs:
