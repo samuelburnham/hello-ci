@@ -31,12 +31,15 @@ commands:
             source $BASH_ENV
   save_rustup_cache:
     steps:
+      - run: cp -R ~/.cargo ~/.rustup /tmp/
       - save_cache:
           name: "Save rustup cache"
           key: cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{arch}}
           paths:
-            - "~/.cargo"
-            - "~/.rustup"
+          #  - "~/.cargo"
+          #  - "~/.rustup"
+          - /tmp/.cargo
+          - /tmp/.rustup
   restore_rustup_cache:
       steps:
         - restore_cache:
@@ -83,6 +86,7 @@ jobs:
     steps:
       - checkout
       - cargo_fetch
+
   linux_build:
     executor: default
     steps:
@@ -104,6 +108,7 @@ jobs:
     - attach_workspace:
         at: "~/"
     - restore_rustup_cache
+    #- run: cp -R /tmp/.cargo /tmp/.rustup ~/ || true
     - run:
         cargo --version
     - run:
