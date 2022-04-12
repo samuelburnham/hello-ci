@@ -39,6 +39,15 @@ commands:
             source $BASH_ENV
 
 jobs:
+  persist-parameters-to-workspace:
+    executor: default
+    steps:
+      - checkout
+      - restore-parameter-cache
+      - persist-to-workspace:
+          root: /tmp
+          paths: .
+          
   cargo-fetch:
     executor: default
     steps:
@@ -88,7 +97,7 @@ jobs:
   mac-build:
     executor: darwin
     steps:
-    - set-env-path
+    #- set-env-path
     - *restore-workspace
     - *restore-cache
     - run:
