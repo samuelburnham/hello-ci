@@ -81,18 +81,26 @@ jobs:
 
   linux_build:
     executor: default
+    parallelism: 4
     steps:
     - checkout
     - set-env-path
     - attach_workspace:
         at: "~/"
-    - restore_rustup_cache
+    # - restore_rustup_cache
+    # - run: cargo --version
     - run:
-        cargo --version
-    - run:
-        name: Linux Tests
-        command: cargo test --verbose
-        no_output_timeout: 30m
+        name: Set up parallel tests
+        command:
+          mkdir -p test-results
+          circleci tests glob "**/*.rs" | circleci tests split --split-by=timings > /tmp/tests-to-run
+          cat /tmp/tests-to-run
+    # - run: 
+    #     name: Linux Tests
+    #     command: cargo test $(cat )
+    #     no_output_timeout: 30m
+    - store_test_results:
+        path: test-results
 
   mac_build:
     executor: darwin
@@ -141,17 +149,18 @@ jobs:
 workflows:
   test_all:
     jobs:
-      - cargo_fetch
-      - linux_build:
-          requires:
-            - cargo_fetch
-      - mac_build:
-          requires:
-            - cargo_fetch
-      - rustfmt:
-          requires:
-            - cargo_fetch
-      - clippy:
-          requires:
-            - cargo_fetch
+      # - cargo_fetch
+      - linux_build
+      #- linux_build:
+          # requires:
+          #   - cargo_fetch
+      # - mac_build:
+      #     requires:
+      #       - cargo_fetch
+      # - rustfmt:
+      #     requires:
+      #       - cargo_fetch
+      # - clippy:
+      #     requires:
+      #       - cargo_fetch
 
