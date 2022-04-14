@@ -91,7 +91,7 @@ jobs:
     # - run: cargo --version
     - run:
         name: Set up parallel tests
-        command:
+        command: |
           mkdir -p test-results
           circleci tests glob "**/*.rs" | circleci tests split --split-by=timings > /tmp/tests-to-run
           cat /tmp/tests-to-run
