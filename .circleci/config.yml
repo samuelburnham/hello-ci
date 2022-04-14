@@ -87,8 +87,8 @@ jobs:
     - set-env-path
     - attach_workspace:
         at: "~/"
-    # - restore_rustup_cache
-    # - run: cargo --version
+    - restore_rustup_cache
+    - run: cargo --version
     # - run:
     #     name: Set up parallel tests
     #     command: |
@@ -149,11 +149,11 @@ jobs:
 workflows:
   test_all:
     jobs:
-      # - cargo_fetch
-      - linux_build
-      #- linux_build:
-          # requires:
-          #   - cargo_fetch
+      - cargo_fetch
+      #- linux_build
+      - linux_build:
+          requires:
+            - cargo_fetch
       # - mac_build:
       #     requires:
       #       - cargo_fetch
