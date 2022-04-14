@@ -89,7 +89,7 @@ jobs:
         at: "~/"
     - restore_rustup_cache
     - run: cargo --version
-    - run: mkdir test-results
+    - run: mkdir -p test-results
     # - run:
     #     name: Set up parallel tests
     #     command: |
