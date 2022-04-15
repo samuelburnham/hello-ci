@@ -30,13 +30,6 @@ commands:
             echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
             source $BASH_ENV
 
-  set-xcode-path:
-    steps:
-      - run:
-          name: Set the PATH env variable
-          command: |
-            # Also put the Rust LLVM tools into the PATH.
-            export PATH=${PATH}:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin
   save_rustup_cache:
     steps:
       - save_cache:
@@ -45,6 +38,7 @@ commands:
           paths:
            - "~/.cargo"
            - "~/.rustup"
+
   restore_rustup_cache:
     steps:
       - restore_cache:
@@ -81,7 +75,7 @@ jobs:
 
   linux_build:
     executor: default
-    # parallelism: 4
+    parallelism: 2
     steps:
     - checkout
     - set-env-path
@@ -89,19 +83,15 @@ jobs:
         at: "~/"
     - restore_rustup_cache
     - run: cargo --version
-    - run: mkdir test-results
-    # - run:
-    #     name: Set up parallel tests
-    #     command: |
-    #       mkdir -p test-results
-    #       circleci tests glob "**/*.rs" | circleci tests split --split-by=timings > /tmp/tests-to-run
-    #       cat /tmp/tests-to-run
-    - run: 
-        name: Linux Tests
-        command: cargo test
-        no_output_timeout: 30m
-    - store_test_results:
-        path: test-results
+    - run:
+        name: Split and run tests in parallel
+        command: |
+          chmod +x test-parallel.sh
+          ./test-parallel.sh
+#    - run: 
+#        name: Linux Tests
+#        command: cargo test
+#        no_output_timeout: 30m
 
   mac_build:
     executor: darwin
