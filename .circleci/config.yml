@@ -86,8 +86,9 @@ jobs:
     - run:
         name: Split and run tests in parallel
         command: |
-          chmod +x test-parallel.sh
-          ./test-parallel.sh
+          ls
+          chmod +x .circleci/ci-parallel.sh
+          .circleci/ci-parallel.sh
 #    - run: 
 #        name: Linux Tests
 #        command: cargo test
