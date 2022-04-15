@@ -10,6 +10,6 @@ cat tests-to-run
 while read name;
 do
     cargo test "$name" --release
-done <tests-to-run
+done <$(cat tests-to-run)
 
 echo "Tests complete"
