@@ -1,6 +1,4 @@
-fn main() {
-    println!("Hello, world!");
-}
+pub mod fib;
 
 #[test]
 fn it_works() {

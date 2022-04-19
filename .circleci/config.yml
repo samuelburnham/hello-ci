@@ -1,28 +1,158 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+parameters:
+  stable-version:
+    type: string
+    default: "stable-2022-02-04"
+  nightly-version:
+    type: string
+    default: "nightly-2022-02-04"
+
+executors:
+  default:
+    machine:
+      image: ubuntu-2004:202010-01
+    working_directory: ~/helloci
+    resource_class: xlarge
+  darwin:
+    macos:
+      xcode: "13.3.0"
+    working_directory: ~/helloci
+    resource_class: xlarge
+
+commands:
+  set-env-path:
+    steps:
+      - run:
+          name: Set the PATH env variable
+          command: |
+            # Also put the Rust LLVM tools into the PATH.
+            echo 'export PATH="$HOME:~/.cargo/bin:~/.rustup/toolchains/<< pipeline.parameters.stable-version >>-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin:$PATH"' | tee --append $BASH_ENV
+            source $BASH_ENV
+
+  save_rustup_cache:
+    steps:
+      - save_cache:
+          name: "Save rustup cache"
+          key: cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{arch}}
+          paths:
+           - "~/.cargo"
+           - "~/.rustup"
+
+  restore_rustup_cache:
+    steps:
+      - restore_cache:
+          keys:
+            - cargo-v2-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
+            - repo-source-{{ .Branch }}-{{ .Revision }}
 jobs:
-  build:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/rust:1.59.0
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+  cargo_fetch:
+    executor: default
     steps:
       - checkout
+      - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
+      - run: echo $HOME
+      - run: cargo --version
+      - run: rustc --version
+      # - run:
+      #     name: Update submodules
+      #     command: git submodule update --init --recursive
       - run:
-          cargo --version
-      - run:
-          name: Run Tests
-          command: "cargo test"
+          name: Calculate dependencies
+          command: cargo generate-lockfile
+      - restore_rustup_cache
+      - run: cargo update
+      - run: cargo fetch
+      - run: rustup install $(cat rust-toolchain)
+      - run: rustup default $(cat rust-toolchain)
+      - run: rustc --version
+      # - run: rm -rf .git
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - helloci
+      - save_rustup_cache
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+  linux_build:
+    executor: default
+    parallelism: 2
+    steps:
+    - checkout
+    - set-env-path
+    - attach_workspace:
+        at: "~/"
+    - restore_rustup_cache
+    - run: cargo --version
+    - run:
+        name: Split and run tests in parallel
+        command: |
+          ls
+          chmod +x .circleci/ci-parallel.sh
+          .circleci/ci-parallel.sh
+#    - run: 
+#        name: Linux Tests
+#        command: cargo test
+#        no_output_timeout: 30m
+
+  mac_build:
+    executor: darwin
+    steps:
+    - checkout
+    #- set-xcode-path
+    - attach_workspace:
+        at: "~/"
+    - run:
+        name: Install Rust
+        command: |
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+    - run: rustup install $(cat rust-toolchain)
+    - run: rustup default $(cat rust-toolchain)
+    - run:
+        cargo --version
+    - run: cargo update
+    - run: cargo fetch
+    - run:
+        name: MacOS Tests
+        command: cargo test --verbose
+        no_output_timeout: 30m
+  rustfmt:
+    executor: default
+    steps:
+      - checkout
+      - set-env-path
+      - attach_workspace:
+          at: "~"
+      - restore_rustup_cache
+      - run:
+          name: Run cargo fmt
+          command: cargo fmt --all -- --check
+  clippy:
+    executor: default
+    steps:
+      - checkout
+      - set-env-path
+      - attach_workspace:
+          at: "~"
+      - restore_rustup_cache
+      - run:
+          name: Run clippy
+          command: cargo clippy --all -- -D warnings
+ 
 workflows:
-  build-workflow:
+  test_all:
     jobs:
-      - build
+      - cargo_fetch
+      #- linux_build
+      - linux_build:
+          requires:
+            - cargo_fetch
+      # - mac_build:
+      #     requires:
+      #       - cargo_fetch
+      # - rustfmt:
+      #     requires:
+      #       - cargo_fetch
+      # - clippy:
+      #     requires:
+      #       - cargo_fetch
+
