@@ -1,5 +1,5 @@
 // From https://www.umcconnell.net/posts/2021-03-13-fibonacci-rust/
-pub fn fib_standard(n: usize) -> usize {
+pub fn fib_iterative(n: usize) -> usize {
   let mut a = 1;
   let mut b = 1;
   
@@ -19,18 +19,19 @@ pub fn fib_recursive(n: usize) -> usize {
   }
 }
 
+#[cfg(test)]
 mod tests {
-  use crate::fib::*;
+  use super::*;
 
   #[test]
   fn easy_fib() {
-    assert_eq!(fib_standard(5), fib_recursive(5));
+    assert_eq!(fib_iterative(5), fib_recursive(5));
   }
   
   #[test]
   fn complicated_fib() {
     //for i in 0..10 {
-      assert_eq!(fib_standard(40), fib_recursive(40));
+      assert_eq!(fib_iterative(40), fib_recursive(40));
     //}
   }
 
