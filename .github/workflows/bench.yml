@@ -29,4 +29,4 @@ jobs:
           # Optional. Compare only this benchmark target
           benchName: "fib"
           # Needed. The name of the branch to compare with. This default uses the branch which is being pulled against
-          #branchName: ${{ github.base_ref }}
+          branchName: main
