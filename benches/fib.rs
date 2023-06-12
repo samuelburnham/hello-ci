@@ -1,14 +1,16 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use crate::{fib_iterative, fib_recursive};
+use criterion::{criterion_group, criterion_main, Criterion, BenchmarkId};
+use hello_ci::fib::{fib_iterative, fib_recursive};
 
-fn iterative_benchmark(c: &mut Criterion) {
-    c.bench_function("fib 20", |b| b.iter(|| fib_iterative(black_box(20))));
+fn bench_fibs(c: &mut Criterion) {
+    let mut group = c.benchmark_group("Fibonacci");
+    for i in [20usize, 21usize].iter() {
+        group.bench_with_input(BenchmarkId::new("Recursive", i), i,
+            |b, i| b.iter(|| fib_recursive(*i)));
+        group.bench_with_input(BenchmarkId::new("Iterative", i), i,
+            |b, i| b.iter(|| fib_iterative(*i)));
+    }
+    group.finish();
 }
 
-fn recursive_benchmark(c: &mut Criterion) {
-    c.bench_function("fib 20", |b| b.iter(|| fib_recursive(black_box(20))));
-}
-
-criterion_group!(benches, iterative_benchmark);
-criterion_group!(benches, recursive_benchmark);
+criterion_group!(benches, bench_fibs);
 criterion_main!(benches);
