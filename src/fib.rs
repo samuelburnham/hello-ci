@@ -2,12 +2,16 @@
 pub fn fib_iterative(n: usize) -> usize {
   let mut a = 1;
   let mut b = 1;
-  
+
   for _ in 1..n {
     let old = a;
     a = b;
     b += old;
+    for _ in 0..1000 {
+      let old = a + 1;
+    }
   }
+  std::thread::sleep(std::time::Duration::from_millis(500));
   
   b
 }
