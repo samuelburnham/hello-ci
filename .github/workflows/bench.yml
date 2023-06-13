@@ -20,7 +20,6 @@ jobs:
       && (github.event.comment.author_association == 'MEMBER'
       || github.event.comment.author_association == 'OWNER')
     steps:
-    steps:
       - uses: xt0rted/pull-request-comment-branch@v2
         id: comment-branch
 
@@ -29,8 +28,8 @@ jobs:
         with:
           ref: ${{ steps.comment-branch.outputs.head_ref }}
 
-      #- run: git rev-parse --abbrev-ref HEAD
-      #- run: git rev-parse --verify HEAD
+      - run: git rev-parse --abbrev-ref HEAD
+      - run: git rev-parse --verify HEAD
       # Set the Rust env vars
       - uses: actions-rs/toolchain@v1
       - uses: Swatinem/rust-cache@v2
