@@ -7,7 +7,7 @@ pub fn fib_iterative(n: usize) -> usize {
     let old = a;
     a = b;
     b += old;
-    for _ in 0..1000 {
+    for _ in 0..10000 {
       let old = a + 1;
     }
   }
