@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 #lurk = { git = "https://github.com/lurk-lab/lurk-rs", branch = "master" }
-pasta-msm = { git = "https://github.com/lurk-lab/pasta-msm.git", branch = "cuda-sm-86" }
+pasta-msm = { git = "https://github.com/lurk-lab/pasta-msm.git", branch = "cuda-sm-86", features = ["portable"] }
 
 [features]
 #gpu = ["lurk/cuda", "lurk/opencl"]

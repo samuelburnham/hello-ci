@@ -53,10 +53,10 @@ jobs:
       - run: apt update && apt install -y gcc-10 g++-10
       - run: export CC=/usr/bin/gcc-10
       - run: export CXX=/usr/bin/g++-10
-      - run: export CUDA_ROOT=/usr/local/cuda
-      - run: rm $CUDA_ROOT/bin/gcc $CUDA_ROOT/bin/g++
-      - run: ln -s /usr/bin/gcc-10 $CUDA_ROOT/bin/gcc
-      - run: ln -s /usr/bin/g++-10 $CUDA_ROOT/bin/g++
+      #- run: export CUDA_ROOT=/usr/local/cuda
+      #- run: rm $CUDA_ROOT/bin/gcc $CUDA_ROOT/bin/g++
+      #- run: ln -s /usr/bin/gcc-10 $CUDA_ROOT/bin/gcc
+      #- run: ln -s /usr/bin/g++-10 $CUDA_ROOT/bin/g++
       - name: gpu test
         run: |
           #cargo nextest run --release --features gpu
