@@ -6,10 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lurk = { git = "https://github.com/lurk-lab/lurk-rs", branch = "master" }
+#lurk = { git = "https://github.com/lurk-lab/lurk-rs", branch = "master" }
+pasta-msm = { git = "https://github.com/lurk-lab/pasta-msm.git", branch = "cuda-sm-86" }
 
 [features]
-gpu = ["lurk/cuda", "lurk/opencl"]
+#gpu = ["lurk/cuda", "lurk/opencl"]
 
 [dev-dependencies]
 criterion = "0.4"
@@ -17,3 +18,8 @@ criterion = "0.4"
 [[bench]]
 name = "fib"
 harness = false
+
+[patch.crates-io]
+pasta-msm = { git = "https://github.com/lurk-lab/pasta-msm.git", branch = "cuda-sm-86" }
+#nova-snark = { git = "https://github.com/lurk-lab/Nova.git" }
+#pasta_curves = { git = "https://github.com/lurk-lab/pasta_curves.git" }
