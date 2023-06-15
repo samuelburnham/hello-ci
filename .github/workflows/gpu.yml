@@ -50,7 +50,7 @@ jobs:
         #- run: clang --version
         #- run: which clang++
         #- run: clang++ --version
-      - run: apt install gcc-10 g++-10
+      - run: apt update && apt install gcc-10 g++-10
       - run: export CC=/usr/bin/gcc-10
       - run: export CXX=/usr/bin/g++-10
       - run: export CUDA_ROOT=/usr/local/cuda
