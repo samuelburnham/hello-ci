@@ -43,14 +43,12 @@ jobs:
       - uses: actions-rs/toolchain@v1
       - uses: taiki-e/install-action@nextest
       - uses: Swatinem/rust-cache@v2
-      - name: test deps
-        run: |
-          which c++
-          c++ --version
-          which clang
-          clang --version
-          which clang++
-          clang++ --version
+      - run: which c++
+      - run: c++ --version
+      - run: which clang
+      - run: clang --version
+      - run: which clang++
+      - run: clang++ --version
       - name: gpu test
         run: |
           #cargo nextest run --release --features gpu
