@@ -25,6 +25,7 @@ env:
   RUSTUP_MAX_RETRIES: 10
   # Don't emit giant backtraces in the CI logs.
   RUST_BACKTRACE: short
+  CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -42,7 +43,15 @@ jobs:
       - uses: actions-rs/toolchain@v1
       - uses: taiki-e/install-action@nextest
       - uses: Swatinem/rust-cache@v2
+      - name: test deps
+        run: |
+          which c++
+          c++ --version
+          which clang
+          clang --version
+          which clang++
+          clang++ --version
       - name: gpu test
         run: |
           #cargo nextest run --release --features gpu
-          cargo nextest run --release
+          cargo nextest run
