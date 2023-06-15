@@ -45,6 +45,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: which c++
       - run: c++ --version
+      - run: apt update && apt install -y clang-14
       - run: which clang
       - run: clang --version
       - run: which clang++
