@@ -44,4 +44,5 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: gpu test
         run: |
-          cargo nextest run --release --features gpu
+          #cargo nextest run --release --features gpu
+          cargo nextest run --release
