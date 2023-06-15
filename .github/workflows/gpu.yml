@@ -60,4 +60,4 @@ jobs:
       - name: gpu test
         run: |
           #cargo nextest run --release --features gpu
-          cargo nextest run
+          CC=gcc-10 CXX=g++-10 cargo nextest run
