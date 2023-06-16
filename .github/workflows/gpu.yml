@@ -42,7 +42,8 @@ jobs:
           submodules: recursive
           #ssh-key: '${{ secrets.CI_SSH_KEY }}'
       - uses: webfactory/ssh-agent@v0.7.0
-        with: ssh-private-key: ${{ secrets.CI_SSH_KEY }}
+        with:
+          ssh-private-key: ${{ secrets.CI_SSH_KEY }}
       - run: git submodule update --init --recursive
       - uses: actions-rs/toolchain@v1
       - uses: taiki-e/install-action@nextest
