@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lurk = { git = "https://github.com/lurk-lab/lurk-rs", branch = "master" }
+lurk = { git = "git@github.com:lurk-lab/lurk-rs.git", branch = "master" }
 #pasta-msm = { git = "https://github.com/lurk-lab/pasta-msm.git", branch = "cuda-sm-86", features = ["portable"] }
 #pasta-msm = "0.1.4"
 
