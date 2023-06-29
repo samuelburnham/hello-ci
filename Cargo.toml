@@ -7,8 +7,6 @@ edition = "2021"
 
 [dependencies]
 lurk = { git = "https://github.com/lurk-lab/lurk-rs.git" }
-#pasta-msm = { git = "https://github.com/lurk-lab/pasta-msm.git", branch = "cuda-sm-86", features = ["portable"] }
-#pasta-msm = "0.1.4"
 
 [features]
 gpu = ["lurk/cuda", "lurk/opencl"]
@@ -19,8 +17,3 @@ criterion = "0.4"
 [[bench]]
 name = "fib"
 harness = false
-
-#[patch.crates-io]
-#pasta-msm = { git = "https://github.com/lurk-lab/pasta-msm.git", branch = "cuda-sm-86" }
-#nova-snark = { git = "https://github.com/lurk-lab/Nova.git" }
-#pasta_curves = { git = "https://github.com/lurk-lab/pasta_curves.git" }
