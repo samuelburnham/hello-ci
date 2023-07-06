@@ -1,9 +1,14 @@
 name: GPU tests
 
+#on:
+  #push:
+    #branches:
+      #- main
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
 env:
   CARGO_TERM_COLOR: always
   # Disable incremental compilation.
@@ -68,4 +73,4 @@ jobs:
       - name: gpu test
         run: |
           #cargo nextest run --release --features gpu
-          CC=gcc-10 CXX=g++-10 cargo nextest run
+          CC=gcc-10 CXX=g++-10 cargo nextest run --release --features gpu
