@@ -32,7 +32,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-gpu:
+  test-gpu-a:
+    runs-on: [self-hosted, gpu]
+    env:
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          #ssh-key: '${{ secrets.CI_SSH_KEY }}'
+      - uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.CI_SSH_KEY }}
+      - run: git submodule update --init --recursive
+      - uses: actions-rs/toolchain@v1
+      - uses: taiki-e/install-action@nextest
+      - uses: Swatinem/rust-cache@v2
+      - run: which c++
+      - run: c++ --version
+      - run: apt update && apt install -y gcc-10 g++-10
+      - run: echo $CUDA_ROOT
+      - run: which gcc
+      - run: gcc --version
+      - name: gpu test
+        run: |
+          CC=gcc-10 CXX=g++-10 cargo nextest run --release --features gpu
+  test-gpu-b:
     runs-on: [self-hosted, gpu]
     env:
       RUSTFLAGS: -D warnings
