@@ -27,6 +27,7 @@ env:
   # Don't emit giant backtraces in the CI logs.
   RUST_BACKTRACE: short
   CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG: true
+  RUSTFLAGS: -D warnings
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -35,8 +36,6 @@ concurrency:
 jobs:
   test-gpu-a:
     runs-on: [self-hosted, gpu]
-    env:
-      RUSTFLAGS: -D warnings
     steps:
       - uses: actions/checkout@v3
         with:
