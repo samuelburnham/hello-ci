@@ -34,7 +34,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-gpu-a:
+  test-gpu:
     runs-on: [self-hosted, gpu]
     steps:
       - uses: actions/checkout@v3
