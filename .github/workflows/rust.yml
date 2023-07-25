@@ -33,7 +33,7 @@
 #
 #jobs:
 #  test:
-#    runs-on: [self-hosted]
+#    runs-on: [self-hosted, test]
 #    env:
 #      RUSTFLAGS: -D warnings
 #    steps:
@@ -42,7 +42,7 @@
 #      - uses: Swatinem/rust-cache@v2
 #      - run: cargo test
 #  clippy:
-#    runs-on: [self-hosted]
+#    runs-on: [self-hosted, test]
 #    steps:
 #      - uses: actions/checkout@v3
 #      - uses: actions-rs/toolchain@v1
