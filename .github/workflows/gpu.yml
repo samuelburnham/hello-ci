@@ -74,6 +74,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
       - uses: taiki-e/install-action@nextest
       - uses: Swatinem/rust-cache@v2
+      - run: nvidia-smi
       - run: which c++
       - run: c++ --version
       - run: apt update && apt install -y gcc-10 g++-10
