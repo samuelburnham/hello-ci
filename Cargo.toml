@@ -9,7 +9,8 @@ edition = "2021"
 lurk = { git = "https://github.com/lurk-lab/lurk-rs.git" }
 
 [features]
-gpu = ["lurk/cuda", "lurk/opencl"]
+cuda = ["lurk/cuda"]
+opencl = ["lurk/opencl"]
 
 [dev-dependencies]
 criterion = "0.4"
