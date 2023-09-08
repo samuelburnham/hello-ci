@@ -18,16 +18,14 @@ jobs:
       && github.event.issue.state == 'open'
       && contains(github.event.comment.body, '!benchmark')
       && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER')
-    # Required permissions
-    permissions:
-      pull-requests: read
     # Set job outputs to values from filter step
     outputs:
       src: ${{ steps.filter.outputs.src }}
     steps:
-      # For pull requests it's not necessary to checkout the code
+      - uses: actions/checkout@v4 
       - uses: dorny/paths-filter@v2
         id: filter
+        ref: ${{ github.ref_name }}
         with:
           filters: |
             src:
