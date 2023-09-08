@@ -29,8 +29,8 @@ jobs:
         run: echo $REF_NAME
       - uses: dorny/paths-filter@v2
         id: filter
-        ref: ${{ github.ref_name }}
         with:
+          ref: ${{ github.ref_name }}
           filters: |
             src:
               - 'src/**'
