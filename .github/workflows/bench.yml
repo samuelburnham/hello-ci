@@ -11,8 +11,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  runBenchmark:
-    name: run benchmark
+  changes:
+    runs-on: ubuntu-latest
+    if:
+      github.event.issue.pull_request
+      && github.event.issue.state == 'open'
+      && contains(github.event.comment.body, '!benchmark')
+      && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER')
+    # Required permissions
+    permissions:
+      pull-requests: read
+    # Set job outputs to values from filter step
+    outputs:
+      src: ${{ steps.filter.outputs.src }}
+    steps:
+      # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'src/**'
+
+  run-benchmark:
+    name: run the benchmark
     runs-on: ubuntu-latest
     if:
       github.event.issue.pull_request
@@ -38,4 +60,31 @@ jobs:
           # Optional. Compare only this benchmark target
           benchName: "fib"
           # Needed. The name of the branch to compare with. This default uses the branch which is being pulled against
+          branchName: ${{ github.ref_name }}
+
+  src-benchmark:
+    name: run src benchmark
+    runs-on: ubuntu-latest
+    needs: changes
+    if:
+      github.event.issue.pull_request
+      && github.event.issue.state == 'open'
+      && contains(github.event.comment.body, '!benchmark')
+      && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER')
+      && ${{ needs.changes.outputs.src == 'true' }}
+    steps:
+      - uses: xt0rted/pull-request-comment-branch@v2
+        id: comment-branch
+      - uses: actions/checkout@v4
+        if: success()
+        with:
+          ref: ${{ steps.comment-branch.outputs.head_ref }}
+      # Set the Rust env vars
+      - uses: actions-rs/toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+      - uses: boa-dev/criterion-compare-action@v3
+        with:
+          # Optional. Compare only this benchmark target
+          benchName: "fib"
+          # Needed. The name of the branch to compare with
           branchName: ${{ github.ref_name }}
