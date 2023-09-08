@@ -6,11 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lurk = { git = "https://github.com/lurk-lab/lurk-rs.git" }
+#lurk = { git = "https://github.com/lurk-lab/lurk-rs.git" }
 
 [features]
-cuda = ["lurk/cuda"]
-opencl = ["lurk/opencl"]
+#cuda = ["lurk/cuda"]
+#opencl = ["lurk/opencl"]
 
 [dev-dependencies]
 criterion = "0.4"
