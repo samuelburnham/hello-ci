@@ -22,15 +22,15 @@ jobs:
     outputs:
       src: ${{ steps.filter.outputs.src }}
     steps:
-      - uses: actions/checkout@v4 
-      - name: Print PR branch name
-        env:
-          REF_NAME: ${{ github.ref_name }}
-        run: echo $REF_NAME
+      - uses: xt0rted/pull-request-comment-branch@v2
+        id: comment-branch
+      - uses: actions/checkout@v4
+        if: success()
+        with:
+          ref: ${{ steps.comment-branch.outputs.head_ref }}
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          ref: ${{ github.ref_name }}
           filters: |
             src:
               - 'src/**'
