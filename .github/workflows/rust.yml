@@ -39,9 +39,13 @@ jobs:
       RUSTFLAGS: -D warnings
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo test
+      - run: git rev-parse HEAD
+      - run: echo "{{ github.sha }}, {{ github.ref }}"
+      - uses: actions/checkout@v3
+          with:
+            ref: main
+      - run: git rev-parse HEAD
+      - run: echo "{{ github.sha }}, {{ github.ref }}"
   clippy:
     runs-on: ubuntu-latest
     steps:
