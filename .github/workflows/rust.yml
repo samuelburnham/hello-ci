@@ -34,7 +34,7 @@ concurrency:
 
 jobs:
   test:
-    runs-on: [self-hosted]
+    runs-on: ubuntu-latest
     env:
       RUSTFLAGS: -D warnings
     steps:
